@@ -1,0 +1,56 @@
+# Lint and security scans of the code itself. Report only: findings never stop a run.
+name: Code scan                                                         # workflow name
+on:                                                                     # trigger
+  pull_request:                                                         # on pull request
+  push:                                                                 # on push
+    branches: [main, 'feature/**', 'fix/**', 'test/**']                 # branch filter
+  workflow_dispatch:                                                    # manual run button
+permissions:                                                            # token rights
+  contents: read                                                        # read-only code
+jobs:                                                                   # three jobs, side by side
+  lint:                                                                 # job
+    name: Lint Python and React                                         # job title
+    runs-on: ubuntu-24.04                                               # agent (pinned image)
+    steps:                                                              # steps
+      - uses: actions/checkout@v7                                       # get code
+        with:                                                           # inputs
+          persist-credentials: false                                    # drop Git token
+      - uses: actions/setup-python@v7                                   # install Python
+        with:
+          python-version: '3.12'                                        # version
+      - uses: actions/setup-node@v7                                     # install Node.js
+        with:
+          node-version: '22'
+          cache: npm                                                    # package cache
+          cache-dependency-path: frontend/package-lock.json             # cache key
+      - run: python -m pip install -r ci/requirements-scan.txt          # pinned scan tools
+      - run: npm --prefix frontend ci                                   # ESLint and its plugins
+      - run: python ci/code_scan.py lint                                # Ruff and ESLint
+  python-security:                                                      # job
+    name: Scan Python code and packages                                 # job title
+    runs-on: ubuntu-24.04                                               # agent (pinned image)
+    steps:                                                              # steps
+      - uses: actions/checkout@v7                                       # get code
+        with:                                                           # inputs
+          persist-credentials: false                                    # drop Git token
+      - uses: actions/setup-python@v7                                   # install Python
+        with:
+          python-version: '3.12'                                        # version
+      - run: python -m pip install -r ci/requirements-scan.txt          # pinned scan tools
+      - run: python ci/code_scan.py python-security                     # Bandit and pip-audit
+  frontend-security:                                                    # job
+    name: Scan React app packages                                       # job title
+    runs-on: ubuntu-24.04                                               # agent (pinned image)
+    steps:                                                              # steps
+      - uses: actions/checkout@v7                                       # get code
+        with:                                                           # inputs
+          persist-credentials: false                                    # drop Git token
+      - uses: actions/setup-python@v7                                   # install Python
+        with:
+          python-version: '3.12'                                        # version
+      - uses: actions/setup-node@v7                                     # install Node.js
+        with:
+          node-version: '22'
+          cache: npm                                                    # package cache
+          cache-dependency-path: frontend/package-lock.json             # cache key
+      - run: python ci/code_scan.py frontend-security                   # npm audit
