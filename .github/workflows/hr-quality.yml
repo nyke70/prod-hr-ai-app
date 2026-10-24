@@ -1,0 +1,39 @@
+# Reviewed changes, staging evaluation and release approval.
+name: HR application delivery and evaluation                            # pipeline name
+on:                                                                     # trigger
+  pull_request:                                                         # on pull request
+  push:                                                                 # on push
+    branches: [main, 'feature/**', 'fix/**', 'test/**']                 # branch filter
+  workflow_dispatch:                                                    # manual run button
+permissions:                                                            # token rights
+  contents: read                                                        # read-only code
+concurrency:                                                            # one run at a time
+  group: hr-staging                                                     # queue name
+  cancel-in-progress: false                                             # never cancel
+jobs:                                                                   # stages
+  # Validate proposed changes before giving code deployment credentials.
+  checks:                                                               # job
+    runs-on: ubuntu-24.04                                               # agent (pinned image)
+    steps:                                                              # steps
+      - uses: actions/checkout@v7                                       # get code
+        with:                                                           # inputs
+          persist-credentials: false                                    # drop Git token
+          fetch-depth: 0                                                # all history and release tags
+      - uses: actions/setup-python@v7                                   # install Python
+        with:
+          python-version: '3.12'                                        # version
+      - name: Install delivery helper dependencies                      # step title
+        run: python -m pip install -r ci/requirements.txt               # install packages
+      - name: Release version is new                                    # step title
+        run: python ci/check_version.py                                 # VERSION newer than last tag
+      - name: Prompt structure and release contract tests
+        run: python -m unittest discover -s ci/tests -v                 # unit tests
+      - name: Build backend candidate with release identity
+        run: python ci/release.py                                       # build package
+      - uses: actions/setup-node@v7                                     # install Node.js
+        with:
+          node-version: '22'
+          cache: npm                                                    # package cache
+          cache-dependency-path: frontend/package-lock.json             # cache key
+      - run: npm --prefix frontend ci                                   # install UI packages
+      - run: npm --prefix frontend run build                            # build UI
