@@ -60,13 +60,7 @@ def assess(client, model, question, draft, evidence):
         'For example, if the user claims 20 carryover days, the evidence permits 5, and the draft says the permitted maximum is 5, pass must be true. '
         'Do not fail because a correct answer contradicts the question. Do not require irrelevant policy details that were not asked. '
         'A refusal or clarification may pass when evidence does not support an answer. '
-        'Return only JSON with pass (boolean) and reason (string).'
-        'Check that the draft fully answers the question in its conversation context. '
-        'For a broad current or historical PTO policy question, require both annual '
-        'entitlement and carryover rules when supported by the supplied evidence. '
-        'For a narrow entitlement question asking how many days, reject unrequested '
-        'additional-leave procedures, manager responsibilities, and escalation contacts. '
-        'Keep conditions necessary to state the entitlement accurately. ',
+        'Return only JSON with pass (boolean) and reason (string).',
         {'question': question, 'draft': draft, 'evidence': evidence})
     # Provider formatting is not a semantic verdict; accept only a complete JSON document.
     raw = re.sub(r"<thinking>.*?</thinking>", "", raw, flags=re.DOTALL | re.IGNORECASE).strip()

@@ -121,15 +121,6 @@ def evaluate_cases(session, origin, release, cases, repeats, records):
                     problems.append(f'slow:{latency:.1f}s over {max_seconds:.0f}s')
                 record.update(passed=not problems, problems=problems, latency_seconds=latency,
                               answer=body['answer'], sources=body['sources'])
-            except requests.HTTPError as error:
-                record['error'] = 'HTTPError'
-                response = error.response
-                status = response.status_code if response is not None else None
-                record['http_status'] = status
-                print(
-                    f"HTTP failure: case {index + 1}, "
-                    f"repeat {repeat + 1}, status {status}"
-                )
             except Exception as error:
                 # Do not include exception text that could contain tokens or HR response data.
                 record['error'] = type(error).__name__
