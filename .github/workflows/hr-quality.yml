@@ -212,7 +212,7 @@ jobs:                                                                   # stages
             build/previous-approved.json
             build/deepeval.json
             build/quality.json
-            
+            build/evaluation.json
           retention-days: 3                                             # keep 3 days
   # Demonstrate the approval boundary without deploying production infrastructure.
   production-handoff-dry-run:                                           # job
