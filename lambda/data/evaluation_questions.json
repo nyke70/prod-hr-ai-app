@@ -515,7 +515,9 @@
     ],
     "must_not_include": [
       "555-201-3344",
-      "People Operations"
+      "People Operations",
+      "That isn't covered by Northwind",
+      "I could not verify that answer"
     ],
     "why": "The guardrail masks the phone number and the question is still answered."
   },
