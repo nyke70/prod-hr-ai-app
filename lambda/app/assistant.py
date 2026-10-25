@@ -183,10 +183,10 @@ def _cited(text, sources):
     # The model sometimes puts "Sources:" at the end of its last sentence rather
     # than on its own line, so look for the last occurrence anywhere.
     lowered = text.lower()
-    markers = list(re.finditer(r"\bsources?\s*:", lowered))
-    if not markers:
+    marker = lowered.rfind("sources:")
+    if marker == -1:
         return []
-    cited = lowered[markers[-1].start():]
+    cited = lowered[marker:]
     return [source for source in sources if source["title"].lower() in cited]
 
 
